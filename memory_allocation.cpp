@@ -3,6 +3,7 @@ using namespace std;
 
 void bestFit(int freeMemory[], int n, int blockSize[], int b)
 {
+    bool fail = false;
     cout << "Best Fit Allocation" << endl;
     //create physical memory of 50 blocks
     int physicalMemory[50];
@@ -20,44 +21,52 @@ void bestFit(int freeMemory[], int n, int blockSize[], int b)
     {
         memoryUsed[i] = NULL;
     }
-    //pick each process and find suitable blocks according to its size and assign to it
-    for(int i = 0; i < b; i ++)
+
+    if(fail == false)
     {
-        int bestIndex = -1;
-        for(int j = 0; j < n; j++)
+        //pick each process and find suitable blocks according to its size and assign to it
+        for(int i = 0; i < b; i ++)
         {
-            if(freeMemory[j] >= blockSize[i])
+            int bestIndex = -1;
+            for(int j = 0; j < n; j++)
             {
-                //finds smallest memory block to allocate new block
-                if(bestIndex == -1)
+                if(freeMemory[j] >= blockSize[i])
                 {
-                    bestIndex = j;
-                }
-                else if(freeMemory[bestIndex] > freeMemory[j])
-                {
-                    bestIndex = j;
+                    //finds smallest memory block to allocate new block
+                    if(bestIndex == -1)
+                    {
+                        bestIndex = j;
+                    }
+                    else if(freeMemory[bestIndex] > freeMemory[j])
+                    {
+                        bestIndex = j;
+                    }
                 }
             }
+
+            //if block could be allocated in memory
+            if(bestIndex != -1)
+            {
+                allocated = allocated + 1;
+                physicalMemory[i] = bestIndex;
+                //reduce available memory
+                freeMemory[bestIndex] -= blockSize[i]; 
+            }
+            else
+            {
+                fail = true;
+                cout << "Block " << i << " was not allocated - Allocation terminated" << endl;
+                return;
+            }
+            //track memory utilization for each new block request/'step'
+            memoryUsed[i] =  double(allocated) / double(n);
+
+            //search time
+            if (physicalMemory[i] != -1)
+            {
+                cout << "block " << i << " search time: " << physicalMemory[i] + 1 << endl;
+            }
         }
-
-        //if block could be allocated in memory
-        if(bestIndex != -1)
-        {
-            allocated = allocated + 1;
-            physicalMemory[i] = bestIndex;
-            //reduce available memory
-            freeMemory[bestIndex] -= blockSize[i]; 
-        }
-
-        //update memory utilization for each new block request/'step'
-        memoryUsed[i] =  double(allocated) / double(n);
-
-        //search time
-        if (physicalMemory[i] != -1)
-            cout << "block " << i << " search time: " << physicalMemory[i] + 1;
-        else
-            cout << "Block " << i << " was not allocated";
-        cout << endl;
     }
     //calculate average memory utilization
     double sum = 0;
@@ -75,6 +84,7 @@ void bestFit(int freeMemory[], int n, int blockSize[], int b)
 
 void worstFit(int freeMemory[], int n, int blockSize[], int b)
 {
+    bool fail = false;
     cout << "Worst Fit Allocation" << endl;
     int physicalMemory[50];
     //initialize all blocks as empty where each block has value of -1
@@ -90,40 +100,48 @@ void worstFit(int freeMemory[], int n, int blockSize[], int b)
         memoryUsed[i] = NULL;
     }
 
-    for(int i = 0; i < b; i++)
+    if(fail == false)
     {
-        int worstIndex = -1;
-        for(int j = 0; j < n; j++)
+        for(int i = 0; i < b; i++)
         {
-            if(freeMemory[j] >= blockSize[i])
+            int worstIndex = -1;
+            for(int j = 0; j < n; j++)
             {
-                //implement search time (j is the number of searches?)
-                if(worstIndex == -1)
+                if(freeMemory[j] >= blockSize[i])
                 {
-                    worstIndex = j;
-                }
-                else if(freeMemory[worstIndex] < freeMemory[j])
-                {
-                    worstIndex = j;
+                    //implement search time (j is the number of searches?)
+                    if(worstIndex == -1)
+                    {
+                        worstIndex = j;
+                    }
+                    else if(freeMemory[worstIndex] < freeMemory[j])
+                    {
+                        worstIndex = j;
+                    }
                 }
             }
-        }
-        //if block allocated, update physical memory and reduce size of freeMemory block
-        if(worstIndex != -1)
-        {
-            allocated = allocated + 1;
-            physicalMemory[i] = worstIndex;
-            freeMemory[worstIndex] -= blockSize[i];
-        }
-        //track memory utilization for each new block request/'step'
-        memoryUsed[i] =  double(allocated) / double(n);
+            //if block allocated, update physical memory and reduce size of freeMemory block
+            if(worstIndex != -1)
+            {
+                allocated = allocated + 1;
+                physicalMemory[i] = worstIndex;
+                freeMemory[worstIndex] -= blockSize[i];
+            }
+            else
+            {
+                fail = true;
+                cout << "Block " << i << " was not allocated - Allocation terminated" << endl;
+                break;
+            }
+            //track memory utilization for each new block request/'step'
+            memoryUsed[i] =  double(allocated) / double(n);
 
-        //search time
-        if (physicalMemory[i] != -1)
-            cout << "block " << i << " search time: " << physicalMemory[i] + 1;
-        else
-            cout << "Block " << i << " was not allocated";
-        cout << endl;
+            //search time
+            if (physicalMemory[i] != -1)
+            {
+                cout << "block " << i << " search time: " << physicalMemory[i] + 1 << endl;
+            }
+        }
     }
     //calculate average memory utilization
     double sum = 0;
@@ -148,7 +166,7 @@ int main()
     cout << "free memory { ";
     for (int i = 0; i < 64; i++)
     {
-        f = (rand() % 6 + 1);
+        f = (rand() % 10 + 1);
         freeMemory[i] = f;
         cout << freeMemory[i] << ", ";
     }
