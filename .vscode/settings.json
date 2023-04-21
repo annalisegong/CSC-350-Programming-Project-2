@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "CSC_543_HW_Indices": "cpp",
+        "iostream": "cpp"
+    },
+    "C_Cpp.errorSquiggles": "disabled"
+}
